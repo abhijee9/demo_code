@@ -34,8 +34,8 @@ download_dir = "/tmp/downloading"
 os.mkdir(encrypted_dir)
 os.mkdir(decrypted_dir)
 os.mkdir(download_dir)
-source_bucket = s3_resource.Bucket("-us-west-2-cpqhub-landing-dev")
-destination_bucket = s3_resource.Bucket("-us-west-2-cpqhub-raw-dev")
+source_bucket = s3_resource.Bucket("954500607455-source-dev")
+destination_bucket = s3_resource.Bucket("954500607455-destination-dev")
 #change the filename that u want to encrypt 
 # to encrypt ---> encrypt = 1. decrypt = 0
 # to decrypt ---> encrypt = 0. decrypt = 1
@@ -44,8 +44,8 @@ encrypt = 1
 decrypt = 0
 filename = "T.FDL.FACT_ANNUITY_CONTRACT_DETAIL_SNAPSHOT_QUARTERLY_EXTRACT.7.20240223093957.dat"
 
-s3_upload_location_for_unencrypted = "manual_upload_unencrypted_file"
-s3_upload_location_for_encrypted="manual_upload_encrypted_file"
+s3_upload_location_for_unencrypted = "unencrypted"
+s3_upload_location_for_encrypted="encrypted"
 if(encrypt):
     s3_key = s3_upload_location_for_unencrypted +'/'+ filename
 else:
@@ -56,16 +56,16 @@ encrypted_file_path = encrypted_dir +'/'+ filename
 dowland_file_path = download_dir +'/'+ filename
 
 
-s3_resource.meta.client.download_file("-us-west-2-cpqhub-landing-dev",s3_key,dowland_file_path)
+s3_resource.meta.client.download_file("954500607455-source-dev",s3_key,dowland_file_path)
 
 
-secret_name = "arn:aws:secretsmanager:us-west-2::secret:"
+secret_name = "arn:aws:secretsmanager:us-east-1:954500607455:secret:test1-hIM1uV"
 private_key_string = secret_client.get_secret_value(SecretId=secret_name)
 private_key_string = private_key_string['SecretString']
 private_key_string = private_key_string.encode('utf-8')
 print("private_key_string", private_key_string)
 
-secret_name = "arn:aws:secretsmanager:us-west-2::secret:"
+secret_name = "arn:aws:secretsmanager:us-east-1:954500607455:secret:test2-Nf0sxn"
 public_key_string = secret_client.get_secret_value(SecretId=secret_name)
 public_key_string = public_key_string['SecretString']
 
@@ -74,7 +74,7 @@ print("public_key_string", public_key_string)
 
 # Read the file to encrypt
 
-passphrase="ltohub"
+passphrase="abhijeet"
 private_key, _ = PGPKey.from_blob(private_key_string)
 public_key, _ = PGPKey.from_blob(public_key_string)
 
@@ -84,7 +84,7 @@ if encrypt == 1:
     with open(encrypted_file_path, "wb") as f:
         f.write(bytes(encrypted_data))
     
-    upload_command = f"aws s3 cp  {encrypted_file_path} s3://-us-west-2-cpqhub-raw-dev/manual_encrypted_file/"
+    upload_command = f"aws s3 cp  {encrypted_file_path} s3://954500607455-destination-dev/encrypted/"
     subprocess.run(upload_command, shell=True, check=True)
         
 if decrypt == 1:      
@@ -96,7 +96,7 @@ if decrypt == 1:
             #decrypted_data = decrypted_data.encode('utf-8')
             with open(decrypted_file_path, "wb") as f:
                 f.write(decrypted_data)
-    upload_command = f"aws s3 cp  {decrypted_file_path} s3://-us-west-2-cpqhub-raw-dev/manual_decrypted_file/"
+    upload_command = f"aws s3 cp  {decrypted_file_path} s3://954500607455-destination-dev/decrypted/"
     subprocess.run(upload_command, shell=True, check=True)
          
 job.commit()

@@ -11,6 +11,8 @@ import subprocess
 import os
 import pgpy
 from pgpy import PGPKey
+import shutil
+
 args = getResolvedOptions(sys.argv, ['JOB_NAME'])
 
 sc = SparkContext()
@@ -24,13 +26,43 @@ kms_client = boto3.client('kms')
 secret_client = boto3.client('secretsmanager')
 
 s3_resource = boto3.resource('s3')
-# Replace these with your actual values
-#encrypted_file_path = "/tmp/encrypted/abhijeet.txt"
-#decrypted_file_path = "/tmp/decrypted/abhijeet.txt"
-#dowland_file_path = "/tmp/downloading/abhijeet.txt"
 encrypted_dir = "/tmp/encrypted"
 decrypted_dir = "/tmp/decrypted"
 download_dir = "/tmp/downloading"
+
+# Check if the directory exists
+if os.path.exists(encrypted_dir):
+    # Attempt to remove the directory and its contents
+    try:
+        shutil.rmtree(encrypted_dir)
+        print(f"Directory '{encrypted_dir}' and its contents removed successfully.")
+    except OSError as e:
+        print(f"Error: {e}")
+else:
+    print(f"Directory '{encrypted_dir}' does not exist.")
+
+# Check if the directory exists
+if os.path.exists(decrypted_dir):
+    # Attempt to remove the directory and its contents
+    try:
+        shutil.rmtree(decrypted_dir)
+        print(f"Directory '{decrypted_dir}' and its contents removed successfully.")
+    except OSError as e:
+        print(f"Error: {e}")
+else:
+    print(f"Directory '{decrypted_dir}' does not exist.")
+
+# Check if the directory exists
+if os.path.exists(download_dir):
+    # Attempt to remove the directory and its contents
+    try:
+        shutil.rmtree(download_dir)
+        print(f"Directory '{download_dir}' and its contents removed successfully.")
+    except OSError as e:
+        print(f"Error: {e}")
+else:
+    print(f"Directory '{download_dir}' does not exist.")
+
 os.mkdir(encrypted_dir)
 os.mkdir(decrypted_dir)
 os.mkdir(download_dir)
@@ -42,7 +74,7 @@ destination_bucket = s3_resource.Bucket("954500607455-destination-dev")
 #to both     ---> encrypt = 1. decrypt = 1
 encrypt = 1
 decrypt = 0
-filename = "T.FDL.FACT_ANNUITY_CONTRACT_DETAIL_SNAPSHOT_QUARTERLY_EXTRACT.7.20240223093957.dat"
+filename = "abhijeet_here.txt"
 
 s3_upload_location_for_unencrypted = "unencrypted"
 s3_upload_location_for_encrypted="encrypted"
@@ -98,6 +130,9 @@ if decrypt == 1:
                 f.write(decrypted_data)
     upload_command = f"aws s3 cp  {decrypted_file_path} s3://954500607455-destination-dev/decrypted/"
     subprocess.run(upload_command, shell=True, check=True)
+
+print("job success")
          
 job.commit()
+
 

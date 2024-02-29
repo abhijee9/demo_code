@@ -74,7 +74,7 @@ destination_bucket = s3_resource.Bucket("954500607455-destination-dev")
 #to both     ---> encrypt = 1. decrypt = 1
 encrypt = 1
 decrypt = 0
-filename = "abhijeet_here.txt"
+filename = "demo.txt"
 
 s3_upload_location_for_unencrypted = "unencrypted"
 s3_upload_location_for_encrypted="encrypted"
